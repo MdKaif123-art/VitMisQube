@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f8fafc;
+  }
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-semibold shadow-sm;
+  }
+  .input-field {
+    @apply w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all;
+    background: #fff;
+  }
+  .card {
+    @apply bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-blue-100 p-6 flex flex-col justify-between;
+  }
+  .search-bar {
+    @apply w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white text-base shadow-sm;
+  }
+  .suggestion-list {
+    @apply absolute z-10 left-0 right-0 mt-1 bg-white border border-blue-100 rounded-lg shadow-lg max-h-60 overflow-auto;
+  }
+  .suggestion-item {
+    @apply px-4 py-2 cursor-pointer hover:bg-blue-50 text-gray-800 transition-colors;
+  }
+  .footer {
+    @apply bg-blue-900 text-white py-8 px-4 mt-16;
+  }
+  .footer-link {
+    @apply hover:underline hover:text-blue-200 transition-colors;
+  }
+} 

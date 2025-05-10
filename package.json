@@ -15,7 +15,12 @@
     "axios": "^1.6.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.1"
+    "react-router-dom": "^6.22.1",
+    "express": "...",
+    "nodemailer": "...",
+    "body-parser": "...",
+    "cors": "...",
+    "dotenv": "..."
   },
   "devDependencies": {
     "@types/react": "^18.2.55",

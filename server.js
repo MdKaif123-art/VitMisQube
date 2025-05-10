@@ -1,15 +1,23 @@
-const express = require('express');
-const nodemailer = require('nodemailer');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+import express from 'express';
+import nodemailer from 'nodemailer';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Use your Gmail and app password here
-const EMAIL_USER = 'quizingsphere@gmail.com';
-const EMAIL_PASS = 'imie ypbb felj fdix';
+// Use environment variables for email configuration
+const EMAIL_USER = process.env.EMAIL_USER || 'quizingsphere@gmail.com';
+const EMAIL_PASS = process.env.EMAIL_PASS || 'imie ypbb felj fdix';
 
 app.post('/send', async (req, res) => {
   const { fullName, email, mobileNumber, subject, message } = req.body;
@@ -38,6 +46,15 @@ app.post('/send', async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
-  console.log('Server started on port 5000');
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static('dist'));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
+}
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
 }); 

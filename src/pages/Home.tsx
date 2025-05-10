@@ -32,7 +32,6 @@ const Home = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [showFilter, setShowFilter] = useState(false);
 
   useEffect(() => {
     setLoading(true);

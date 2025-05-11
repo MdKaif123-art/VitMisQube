@@ -1,28 +1,45 @@
-const API_KEY = 'AIzaSyBotKlJNtRQGi3j0oqPwjfxt2SmVS5gm5w';
-const FOLDER_ID = '1DMIbW82L2X69BxmcQgYUTwxoEMIpPbUg';
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+const FOLDER_ID = import.meta.env.VITE_FOLDER_ID;
 
 export interface Paper {
   id: string;
-  title: string;
   courseCode: string;
   courseName: string;
-  type: 'CAT1' | 'CAT2' | 'FAT';
-  uploadDate: string;
+  type: 'CAT-1' | 'CAT-2' | 'FAT';
+  semester: string;
   slot: string;
   driveLink: string;
 }
 
 function parseFileName(name: string): Omit<Paper, 'id' | 'driveLink'> | null {
-  // Example: CSE1001_IntroToProgramming_CAT1_2023-10-25_SlotA.pdf or SlotB1.pdf or SlotA2.pdf.pdf
-  const match = name.match(/^([A-Z]+\d+)_([A-Za-z]+)_((CAT1|CAT2|FAT))_(\d{4}-\d{2}-\d{2})_Slot([A-Za-z0-9]+)\.pdf(?:\.pdf)?$/);
-  if (!match) return null;
+  // Format: COURSECODE_COURSENAME_TYPE_SEMESTER_SlotXXX.pdf
+  const parts = name.replace('.pdf', '').split('_');
+  if (parts.length !== 5) return null;
+
+  const [courseCode, courseName, type, semester, slotPart] = parts;
+  
+  // Convert type format
+  let examType: 'CAT-1' | 'CAT-2' | 'FAT';
+  switch (type) {
+    case 'CAT1':
+      examType = 'CAT-1';
+      break;
+    case 'CAT2':
+      examType = 'CAT-2';
+      break;
+    case 'FAT':
+      examType = 'FAT';
+      break;
+    default:
+      return null;
+  }
+
   return {
-    courseCode: match[1],
-    courseName: match[2].replace(/([A-Z])/g, ' $1').trim(),
-    type: match[3] as 'CAT1' | 'CAT2' | 'FAT',
-    uploadDate: match[5],
-    slot: match[6],
-    title: `${match[1]} - ${match[2].replace(/([A-Z])/g, ' $1').trim()}`,
+    courseCode,
+    courseName,
+    type: examType,
+    semester,
+    slot: slotPart.replace('Slot', '')
   };
 }
 
@@ -30,7 +47,9 @@ export async function fetchDrivePapers(): Promise<Paper[]> {
   const url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType='application/pdf'&key=${API_KEY}&fields=files(id,name,webViewLink)`;
   const res = await fetch(url);
   const data = await res.json();
+  
   if (!data.files) return [];
+  
   return data.files
     .map((file: any) => {
       const parsed = parseFileName(file.name);
@@ -42,4 +61,4 @@ export async function fetchDrivePapers(): Promise<Paper[]> {
       };
     })
     .filter(Boolean);
-} 
+}

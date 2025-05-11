@@ -3,6 +3,7 @@ import { MagnifyingGlassIcon, XMarkIcon, FunnelIcon, CheckIcon } from '@heroicon
 import { fetchDrivePapers, Paper } from '../utils/fetchDriveFiles';
 import { Link } from 'react-router-dom';
 import { Listbox, Transition } from '@headlessui/react';
+import { HeroGeometric } from '../components/ui/shape-landing-hero';
 
 const typeLabels: Record<string, string> = {
   all: 'All Exams',
@@ -12,15 +13,18 @@ const typeLabels: Record<string, string> = {
 };
 
 const typeColors: Record<string, string> = {
-  CAT1: 'bg-blue-100 text-blue-800',
-  CAT2: 'bg-green-100 text-green-800',
-  FAT: 'bg-purple-100 text-purple-800',
+  'Winter CAT-1': 'bg-[#008080] text-white',
+  'Winter CAT-2': 'bg-[#00BFFF] text-black',
+  'Winter FAT': 'bg-[#00FFFF] text-black',
+  'Summer CAT-1': 'bg-[#008080] text-white',
+  'Summer CAT-2': 'bg-[#00BFFF] text-black',
+  'Summer FAT': 'bg-[#00FFFF] text-black',
 };
 
 const examTypes = [
   { value: 'all', label: 'All Exams' },
-  { value: 'CAT1', label: 'CAT-1' },
-  { value: 'CAT2', label: 'CAT-2' },
+  { value: 'CAT-1', label: 'CAT-1' },
+  { value: 'CAT-2', label: 'CAT-2' },
   { value: 'FAT', label: 'FAT' },
 ];
 
@@ -89,58 +93,55 @@ const Home = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-2 md:px-6">
-      <div className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-2 tracking-tight text-blue-900">VitMisQube Paper Bank</h1>
-        <p className="text-center text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-          Access past exam papers by searching for your course. Find CAT-1, CAT-2, and FAT papers to help you prepare for your exams.
+    <div className="relative min-h-screen w-full bg-black pb-10 overflow-hidden">
+      <HeroGeometric 
+        badge="VIT Question Papers"
+        title1="Question Paper"
+        title2="Sphere"
+      />
+      
+      {/* Stats Section */}
+      <div className="relative z-10 text-center mt-[-100px] mb-8">
+        <div className="text-[#008080] text-sm mb-6">
+          Total Papers Available: <span className="font-medium text-[#00FFFF]">{papers.length}</span>
+        </div>
+        <p className="text-[#00BFFF] text-lg mb-8">
+          Find and download previous year question papers
         </p>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-4 mb-6 relative">
-          <div className="w-full md:w-[700px] mx-auto relative">
-            <div className="relative">
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Search for a subject or course code..."
-                className="search-bar"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setSelectedCourse(null);
-                }}
-                autoComplete="off"
-              />
-              {selectedCourse ? (
-                <button
-                  onClick={clearSelection}
-                  className="absolute right-10 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-blue-500"
-                  title="Clear selection"
-                >
-                  <XMarkIcon className="w-5 h-5" />
-                </button>
-              ) : null}
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-500">
-                <MagnifyingGlassIcon className="w-5 h-5" />
-              </span>
-            </div>
-            {/* Suggestions dropdown */}
-            {suggestions.length > 0 && (
-              <ul className="suggestion-list">
-                {suggestions.map((s) => (
-                  <li
-                    key={s}
-                    className="suggestion-item"
-                    onClick={() => handleSuggestionClick(s)}
-                  >
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            )}
+      </div>
+
+      {/* Search bar and filter */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-4 mb-10 relative px-2">
+        <div className="w-full md:w-[700px] mx-auto relative flex items-center gap-2">
+          <div className="relative flex-1">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search by course name or code..."
+              className="search-bar"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSelectedCourse(null);
+              }}
+              autoComplete="off"
+            />
+            {selectedCourse ? (
+              <button
+                onClick={clearSelection}
+                className="absolute right-10 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-blue-500"
+                title="Clear selection"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            ) : null}
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-500">
+              <MagnifyingGlassIcon className="w-5 h-5" />
+            </span>
           </div>
           <Listbox value={selectedType} onChange={setSelectedType}>
             <div className="relative">
-              <Listbox.Button className="border border-blue-300 rounded-lg px-4 py-2 flex items-center gap-2 text-gray-700 hover:bg-blue-50 transition-colors font-medium ml-auto md:ml-0 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <Listbox.Button className="border border-blue-300 rounded-lg px-4 py-2 flex items-center gap-2 text-gray-200 bg-[#232136]/80 hover:bg-[#393053] transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <FunnelIcon className="w-5 h-5" />
                 <span className="hidden md:inline">Filter</span>
               </Listbox.Button>
@@ -150,22 +151,22 @@ const Home = () => {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Listbox.Options className="absolute right-0 mt-2 w-48 rounded-lg bg-white border border-blue-100 shadow-lg z-20 py-2">
-                  <div className="px-4 py-2 text-xs text-gray-500 font-semibold">Exam Type</div>
+                <Listbox.Options className="absolute right-0 mt-2 w-48 rounded-lg bg-[#232136] border border-blue-100 shadow-lg z-20 py-2">
+                  <div className="px-4 py-2 text-xs text-purple-200 font-semibold">Exam Type</div>
                   {examTypes.map((type) => (
                     <Listbox.Option
                       key={type.value}
                       value={type.value}
                       className={({ active }) =>
                         `cursor-pointer select-none px-4 py-2 text-sm flex items-center gap-2 ${
-                          active ? 'bg-blue-50 text-blue-900' : 'text-gray-800'
+                          active ? 'bg-[#393053] text-purple-200' : 'text-gray-200'
                         }`
                       }
                     >
                       {({ selected }) => (
                         <>
                           <span className="flex-1">{type.label}</span>
-                          {selected ? <CheckIcon className="w-4 h-4 text-blue-600" /> : null}
+                          {selected ? <CheckIcon className="w-4 h-4 text-purple-300" /> : null}
                         </>
                       )}
                     </Listbox.Option>
@@ -174,43 +175,71 @@ const Home = () => {
               </Transition>
             </div>
           </Listbox>
+          {/* Suggestions dropdown */}
+          {suggestions.length > 0 && (
+            <ul className="suggestion-list">
+              {suggestions.map((s) => (
+                <li
+                  key={s}
+                  className="suggestion-item"
+                  onClick={() => handleSuggestionClick(s)}
+                >
+                  {s}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
-      {loading ? (
-        <div className="text-center text-lg text-gray-500">Loading papers...</div>
-      ) : (
-        <>
-          <h2 className="text-xl font-bold mb-4">{filteredPapers.length} Papers Available</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPapers.map((paper) => (
-              <Link
-                to={`/paper/${paper.id}`}
-                key={paper.id}
-                className="card cursor-pointer no-underline"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-blue-900 font-semibold text-lg">{paper.courseCode}</span>
-                    <span className={`text-xs font-bold px-2 py-1 rounded ${typeColors[paper.type]}`}>{typeLabels[paper.type]}</span>
-                  </div>
-                  <div className="font-bold text-md mb-2">{paper.courseName.replace(/([A-Z])/g, ' $1').trim()}</div>
-                  <div className="flex items-center text-gray-600 text-sm mb-1">
-                    <span className="mr-2">📅 {paper.uploadDate}</span>
-                    <span>Slot: {paper.slot}</span>
-                  </div>
-                  <div className="text-gray-500 text-sm mb-2">PDF Document</div>
-                </div>
-                <div className="mt-3 w-full text-center border border-blue-600 text-blue-700 px-4 py-2 rounded hover:bg-blue-50 transition-colors font-semibold">
+      {/* Cards grid */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 max-w-7xl mx-auto">
+        {loading ? (
+          <div className="text-center text-lg text-[#00FFFF] col-span-full">Loading papers...</div>
+        ) : filteredPapers.length === 0 ? (
+          <div className="text-center text-lg text-[#00FFFF] col-span-full">No papers found.</div>
+        ) : (
+          filteredPapers.map((paper) => (
+            <Link
+              to={`/paper/${paper.id}`}
+              key={paper.id}
+              className="bg-black rounded-xl border border-[#00FFFF] p-6 hover:border-[#00BFFF] transition-colors relative group"
+            >
+              {/* Exam Type Tag in top right */}
+              <div className="absolute top-4 right-4">
+                <span className="bg-[#008080] text-white px-3 py-1 rounded-md text-sm">
+                  {paper.type}
+                </span>
+              </div>
+
+              {/* Course Info */}
+              <div className="space-y-3">
+                <h3 className="text-[#00FFFF] text-2xl font-bold">
+                  {paper.courseCode}
+                </h3>
+                <p className="text-[#00BFFF] text-lg">
+                  {paper.courseName}
+                </p>
+                <p className="text-[#00FFFF] font-medium">
+                  {paper.semester}
+                </p>
+                <p className="text-[#008080]">
+                  Slot: {paper.slot}
+                </p>
+              </div>
+
+              {/* View Paper Button */}
+              <div className="mt-4">
+                <div className="w-full text-center border border-[#00FFFF] text-[#00FFFF] px-4 py-2 rounded-lg group-hover:bg-[#00FFFF]/10 transition-colors">
                   View Paper
                 </div>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
+              </div>
+            </Link>
+          ))
+        )}
+      </section>
     </div>
   );
 };
 
-export default Home; 
+export default Home;

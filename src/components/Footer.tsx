@@ -35,9 +35,12 @@ const Footer = () => (
       <div className="flex-1 min-w-[180px]">
         <div className="font-bold mb-2 text-[#00FFFF]">Contact Us</div>
         <ul className="space-y-1 text-sm text-white">
-          <li className="flex items-center gap-2"><EnvelopeIcon className="w-4 h-4 text-[#00FFFF]" /> contact@vitmisqube.edu</li>
-          <li className="flex items-center gap-2"><PhoneIcon className="w-4 h-4 text-[#00FFFF]" /> +91 123 456 7890</li>
-          <li className="flex items-center gap-2"><MapPinIcon className="w-4 h-4 text-[#00FFFF]" /> VIT University Campus, Vellore, Tamil Nadu, India</li>
+          <li className="flex items-center gap-2">
+            <EnvelopeIcon className="w-4 h-4 text-[#00FFFF]" />
+            <span className="hover:text-[#00BFFF] hover:shadow-[0_0_10px_rgba(0,191,255,0.3)] transition-all cursor-pointer">
+              mdkaif196905@gmail.com
+            </span>
+          </li>
         </ul>
       </div>
     </div>

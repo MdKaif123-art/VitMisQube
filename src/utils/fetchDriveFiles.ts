@@ -1,64 +1,50 @@
-const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
-const FOLDER_ID = import.meta.env.VITE_FOLDER_ID;
+const API_KEY = 'AIzaSyBotKlJNtRQGi3j0oqPwjfxt2SmVS5gm5w';
+const FOLDER_ID = '1DMIbW82L2X69BxmcQgYUTwxoEMIpPbUg';
 
 export interface Paper {
   id: string;
   courseCode: string;
   courseName: string;
-  type: 'CAT-1' | 'CAT-2' | 'FAT';
+  type: string;
   semester: string;
   slot: string;
   driveLink: string;
+  uploadDate: string;
 }
 
-function parseFileName(name: string): Omit<Paper, 'id' | 'driveLink'> | null {
-  // Format: COURSECODE_COURSENAME_TYPE_SEMESTER_SlotXXX.pdf
+function parseFileName(name: string): Omit<Paper, 'id' | 'driveLink' | 'uploadDate'> {
   const parts = name.replace('.pdf', '').split('_');
-  if (parts.length !== 5) return null;
-
-  const [courseCode, courseName, type, semester, slotPart] = parts;
-  
-  // Convert type format
-  let examType: 'CAT-1' | 'CAT-2' | 'FAT';
-  switch (type) {
-    case 'CAT1':
-      examType = 'CAT-1';
-      break;
-    case 'CAT2':
-      examType = 'CAT-2';
-      break;
-    case 'FAT':
-      examType = 'FAT';
-      break;
-    default:
-      return null;
-  }
-
   return {
-    courseCode,
-    courseName,
-    type: examType,
-    semester,
-    slot: slotPart.replace('Slot', '')
+    courseCode: parts[0] || '',
+    courseName: (parts[1] || '').replace(/([A-Z])/g, ' $1').trim(),
+    type: parts[2] || '',
+    semester: parts[3] || '',
+    slot: (parts[4]?.replace(/^Slot/i, '') || '').trim()
   };
 }
 
 export async function fetchDrivePapers(): Promise<Paper[]> {
-  const url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType='application/pdf'&key=${API_KEY}&fields=files(id,name,webViewLink)`;
-  const res = await fetch(url);
-  const data = await res.json();
-  
-  if (!data.files) return [];
-  
-  return data.files
-    .map((file: any) => {
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType='application/pdf'&key=${API_KEY}&fields=files(id,name,webViewLink,modifiedTime)`
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch files from Drive');
+    }
+
+    const data = await response.json();
+    return data.files.map((file: any) => {
       const parsed = parseFileName(file.name);
-      if (!parsed) return null;
       return {
         id: file.id,
         ...parsed,
         driveLink: file.webViewLink,
+        uploadDate: file.modifiedTime
       };
-    })
-    .filter(Boolean);
+    });
+  } catch (error) {
+    console.error('Error fetching papers:', error);
+    return [];
+  }
 }

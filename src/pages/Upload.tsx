@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { Link } from 'react-router-dom';
 
 // Update this line to match your server port
 const UPLOAD_ENDPOINT = 'http://localhost:5000/api/upload'; // Update this with your actual backend endpoint
@@ -97,6 +98,33 @@ const Upload = () => {
           Upload Question Paper
         </h1>
 
+        <div className="mb-8 text-center">
+          <p className="text-lg text-white mb-4">
+            Share your question papers to help fellow students prepare better.
+          </p>
+          <div className="bg-[#232136]/40 backdrop-blur-sm p-6 rounded-xl border border-[#00FFFF]/20 shadow-[0_0_15px_rgba(0,255,255,0.1)]">
+            <h2 className="text-[#00FFFF] font-semibold mb-3">Upload Guidelines</h2>
+            <ul className="text-white text-sm space-y-2 text-left">
+              <li className="flex items-center gap-2">
+                <span className="text-[#00BFFF]">•</span>
+                File must be in PDF format
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-[#00BFFF]">•</span>
+                Name format: CourseCode_ExamType_Slot (e.g., ISWE304L_CAT1_A1)
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-[#00BFFF]">•</span>
+                Maximum file size: 10MB
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-[#00BFFF]">•</span>
+                Papers will be verified before publishing
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all ${
@@ -159,6 +187,30 @@ const Upload = () => {
             <p>{status.message}</p>
           </div>
         )}
+
+        {/* Additional Information */}
+        <div className="mt-16 mb-8">
+          <div className="bg-[#232136]/40 backdrop-blur-sm p-6 rounded-xl border border-[#00FFFF]/20 shadow-[0_0_15px_rgba(0,255,255,0.1)]">
+            <h2 className="text-[#00FFFF] font-semibold mb-3">Need Help?</h2>
+            <p className="text-white text-sm">
+              If you have any questions or need assistance with uploading papers, feel free to reach out to us. We're here to help!
+            </p>
+            <div className="mt-6 flex items-center gap-4">
+              <Link 
+                to="/contact"
+                className="px-4 py-2 bg-[#008080] text-[#00FFFF] rounded-lg hover:bg-[#008080]/80 transition-colors"
+              >
+                Contact Support
+              </Link>
+              <Link 
+                to="/contact#faqs"
+                className="px-4 py-2 border border-[#008080] text-[#00FFFF] rounded-lg hover:bg-[#008080]/20 transition-colors"
+              >
+                View FAQs
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

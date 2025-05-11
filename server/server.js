@@ -13,6 +13,12 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -21,7 +27,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Make sure this directory exists
+    cb(null, uploadsDir);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname);
@@ -30,8 +36,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Email configuration
-const EMAIL_USER = 'quizingsphere@gmail.com';
-const EMAIL_PASS = 'iqok ayxq wexw yuhp';
+const EMAIL_USER = process.env.EMAIL_USER || 'quizingsphere@gmail.com';
+const EMAIL_PASS = process.env.EMAIL_PASS || 'iqok ayxq wexw yuhp';
 
 // File upload endpoint
 app.post('/api/upload', upload.single('file'), async (req, res) => {
@@ -50,7 +56,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
     const mailOptions = {
       from: EMAIL_USER,
-      to: EMAIL_USER, // Send to yourself
+      to: EMAIL_USER,
       subject: 'New File Upload Notification',
       text: `A new file has been uploaded:
 Filename: ${req.file.originalname}
@@ -66,9 +72,6 @@ Uploaded at: ${new Date().toLocaleString()}`,
     };
 
     await transporter.sendMail(mailOptions);
-
-    // Optionally, delete the file after sending email
-    // fs.unlinkSync(req.file.path);
 
     res.json({
       message: 'File uploaded successfully and email notification sent',
@@ -112,13 +115,16 @@ app.post('/send', async (req, res) => {
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('dist'));
+  const distPath = path.join(__dirname, '..', 'dist');
+  app.use(express.static(distPath));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    res.sendFile(path.join(distPath, 'index.html'));
   });
 }
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+
+app.listen(PORT, HOST, () => {
+  console.log(`Server started on ${HOST}:${PORT}`);
 });

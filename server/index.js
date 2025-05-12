@@ -117,19 +117,53 @@ app.post('/send', async (req, res) => {
 });
 
 // Routes
-app.post('/api/upload', upload.single('file'), (req, res) => {
+app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      return res.status(400).json({ 
+        success: false,
+        message: 'No file uploaded' 
+      });
     }
+
+    // Send email notification
+    const mailOptions = {
+      from: EMAIL_USER,
+      to: EMAIL_USER,
+      subject: 'New File Upload Notification',
+      text: `A new file has been uploaded:
+Filename: ${req.file.originalname}
+Stored as: ${req.file.filename}
+Size: ${req.file.size} bytes
+Upload time: ${new Date().toLocaleString()}`,
+      attachments: [
+        {
+          filename: req.file.originalname,
+          path: req.file.path
+        }
+      ]
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('Upload notification email sent successfully');
+    } catch (emailError) {
+      console.error('Error sending upload notification email:', emailError);
+      // Continue with the response even if email fails
+    }
+
     res.json({ 
-      message: 'File uploaded successfully',
+      success: true,
+      message: 'File uploaded successfully and notification sent',
       filename: req.file.filename,
       url: `/uploads/${req.file.filename}`
     });
   } catch (error) {
     console.error('Upload error:', error);
-    res.status(500).json({ message: 'Error uploading file' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Error uploading file' 
+    });
   }
 });
 

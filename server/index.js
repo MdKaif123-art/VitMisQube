@@ -1,56 +1,76 @@
 const express = require('express');
 const cors = require('cors');
-const app = express();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+require('dotenv').config();
 
+const app = express();
+const port = process.env.PORT || 5000;
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Sample data
-const papers = [
-  {
-    id: '1',
-    courseCode: 'CSE1001',
-    courseName: 'Introduction to Programming',
-    type: 'CAT-1',
-    semester: 'Winter 2023',
-    slot: 'A1+TA1',
-    uploadDate: '2024-01-15'
+// Configure multer for file upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = 'uploads';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+    cb(null, uploadDir);
   },
-  {
-    id: '2',
-    courseCode: 'CSE2002',
-    courseName: 'Data Structures',
-    type: 'CAT-2',
-    semester: 'Winter 2023',
-    slot: 'B1+TB1',
-    uploadDate: '2024-01-20'
-  },
-  {
-    id: '3',
-    courseCode: 'MAT1001',
-    courseName: 'Calculus',
-    type: 'FAT',
-    semester: 'Winter 2023',
-    slot: 'C1+TC1',
-    uploadDate: '2024-01-25'
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
   }
-];
+});
 
-// Get all papers
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  }
+});
+
+// Routes
+app.post('/api/upload', upload.single('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    res.json({ 
+      message: 'File uploaded successfully',
+      filename: req.file.filename
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ message: 'Error uploading file' });
+  }
+});
+
 app.get('/api/papers', (req, res) => {
-  res.json({ files: papers });
-});
-
-// Get paper by ID
-app.get('/api/papers/:id', (req, res) => {
-  const paper = papers.find(p => p.id === req.params.id);
-  if (!paper) {
-    return res.status(404).json({ message: 'Paper not found' });
+  const uploadsDir = path.join(__dirname, 'uploads');
+  try {
+    if (!fs.existsSync(uploadsDir)) {
+      return res.json([]);
+    }
+    const files = fs.readdirSync(uploadsDir);
+    const papers = files.map(filename => ({
+      id: filename,
+      name: filename,
+      url: `/uploads/${filename}`
+    }));
+    res.json(papers);
+  } catch (error) {
+    console.error('Error reading papers:', error);
+    res.status(500).json({ message: 'Error fetching papers' });
   }
-  res.json(paper);
 });
 
-const port = process.env.PORT || 5000;
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 }); 

@@ -1,9 +1,13 @@
 "use client";
 
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { motion } from "framer-motion";
 import { Circle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
+import { twMerge } from 'tailwind-merge';
+import { clsx } from 'clsx';
+
+const cn = (...inputs: any) => {
+  return twMerge(clsx(inputs));
+};
 
 function ElegantShape({
     className,
@@ -153,7 +157,7 @@ function HeroGeometric({
                         animate="visible"
                         className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] mb-8 md:mb-12"
                     >
-                        <Circle className="h-2 w-2 fill-rose-500/80" />
+                        <Circle className="h-2 w-2 fill-[#00FFFF]" />
                         <span className="text-sm text-white/60 tracking-wide">
                             {badge}
                         </span>

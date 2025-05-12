@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { Link } from 'react-router-dom';
+import { API_URL } from '../config';
 
-// Update this line to match your server port
-const UPLOAD_ENDPOINT = 'http://localhost:5000/api/upload'; // Update this with your actual backend endpoint
+const UPLOAD_ENDPOINT = `${API_URL}/api/upload`;
 
 const Upload = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -39,53 +40,46 @@ const Upload = () => {
     setUploadProgress(0);
 
     try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', UPLOAD_ENDPOINT);
-
-      // Track upload progress
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const progress = Math.round((event.loaded / event.total) * 100);
-          setUploadProgress(progress);
-        }
-      };
-
-      // Handle the completion
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          setUploadProgress(100); // Ensure progress is 100%
-          setStatus({ 
-            type: 'success', 
-            message: 'Successfully sent!' 
-          });
-          setFiles([]);
-        } else {
-          const error = JSON.parse(xhr.responseText);
-          setStatus({ 
-            type: 'error', 
-            message: error.message || `Upload failed: ${xhr.status} ${xhr.statusText}` 
-          });
-        }
-        setUploading(false);
-      };
-
-      xhr.onerror = () => {
-        setStatus({ 
-          type: 'error', 
-          message: 'Network error occurred while uploading' 
-        });
-        setUploading(false);
-      };
-
       const formData = new FormData();
       formData.append('file', files[0]);
-      xhr.send(formData);
 
+      const response = await fetch(UPLOAD_ENDPOINT, {
+        method: 'POST',
+        body: formData
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        if (response.ok) {
+          data = { success: true, message: 'File uploaded successfully!' };
+        } else {
+          throw err;
+        }
+      }
+
+      if (response.ok || data.success) {
+        setUploadProgress(100);
+        setStatus({ 
+          type: 'success', 
+          message: 'File uploaded successfully!'
+        });
+        setFiles([]);
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setStatus({ type: null, message: null });
+        }, 5000);
+      } else {
+        throw new Error(data.message || 'Failed to upload file');
+      }
     } catch (err) {
       setStatus({ 
         type: 'error', 
-        message: err instanceof Error ? err.message : 'Failed to upload file. Please try again.' 
+        message: err instanceof Error ? err.message : 'Network error occurred while uploading' 
       });
+    } finally {
       setUploading(false);
     }
   };
@@ -96,6 +90,33 @@ const Upload = () => {
         <h1 className="text-4xl font-bold text-[#00FFFF] mb-8 text-center">
           Upload Question Paper
         </h1>
+
+        <div className="mb-8 text-center">
+          <p className="text-lg text-white mb-4">
+            Share your question papers to help fellow students prepare better.
+          </p>
+          <div className="bg-[#232136]/40 backdrop-blur-sm p-6 rounded-xl border border-[#00FFFF]/20 shadow-[0_0_15px_rgba(0,255,255,0.1)]">
+            <h2 className="text-[#00FFFF] font-semibold mb-3">Upload Guidelines</h2>
+            <ul className="text-white text-sm space-y-2 text-left">
+              <li className="flex items-center gap-2">
+                <span className="text-[#00BFFF]">•</span>
+                File must be in PDF format
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-[#00BFFF]">•</span>
+                Name format: CourseCode_ExamType_Slot (e.g., ISWE304L_CAT1_A1)
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-[#00BFFF]">•</span>
+                Maximum file size: 10MB
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-[#00BFFF]">•</span>
+                Papers will be verified before publishing
+              </li>
+            </ul>
+          </div>
+        </div>
 
         <div
           {...getRootProps()}
@@ -150,15 +171,38 @@ const Upload = () => {
         )}
 
         {status.type === 'success' && status.message && (
-          <div className="mt-4 p-3 rounded-lg border bg-green-500/10 border-green-500 text-green-500">
+          <div className="mt-4 p-3 rounded-lg bg-[#008080]/20 border border-[#00FFFF] text-[#00FFFF] flex items-center animate-fadeIn">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
             <p>{status.message}</p>
           </div>
         )}
+        
         {status.type === 'error' && status.message && (
-          <div className="mt-4 p-3 rounded-lg border bg-red-500/10 border-red-500 text-red-500">
+          <div className="mt-4 p-3 rounded-lg bg-red-900/20 border border-red-500 text-red-400 flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             <p>{status.message}</p>
           </div>
         )}
+
+        {/* Additional Information */}
+        <div className="mt-16 mb-8">
+          <div className="bg-[#232136]/40 backdrop-blur-sm p-6 rounded-xl border border-[#00FFFF]/20 shadow-[0_0_15px_rgba(0,255,255,0.1)]">
+            <h2 className="text-[#00FFFF] font-semibold mb-4">Need Help?</h2>
+            <p className="text-white text-sm mb-4">
+              If you're having trouble uploading papers or have any questions, feel free to reach out to us.
+            </p>
+            <Link
+              to="/contact"
+              className="inline-block text-[#00BFFF] hover:text-[#00FFFF] transition-colors"
+            >
+              Contact Support →
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

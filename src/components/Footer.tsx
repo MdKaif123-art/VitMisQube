@@ -1,4 +1,4 @@
-import { EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import logo from '../assets/vitmisqube-logo.png';
 
@@ -7,8 +7,13 @@ const Footer = () => (
     <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8 pb-4">
       {/* Logo and description */}
       <div className="flex-1 min-w-[180px]">
-        <div className="flex items-center gap-2 mb-2">
-          <img src={logo} alt="VitMisQube Logo" className="h-16 w-auto object-contain" style={{ background: 'transparent' }} />
+        <div className="flex items-center gap-2 mb-2 group">
+          <img 
+            src={logo} 
+            alt="VitMisQube Logo" 
+            className="h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-110" 
+            style={{ background: 'transparent' }} 
+          />
         </div>
         <p className="text-sm text-white opacity-80">Your comprehensive resource for academic papers, exams, and study materials.</p>
       </div>
@@ -35,9 +40,12 @@ const Footer = () => (
       <div className="flex-1 min-w-[180px]">
         <div className="font-bold mb-2 text-[#00FFFF]">Contact Us</div>
         <ul className="space-y-1 text-sm text-white">
-          <li className="flex items-center gap-2"><EnvelopeIcon className="w-4 h-4 text-[#00FFFF]" /> contact@vitmisqube.edu</li>
-          <li className="flex items-center gap-2"><PhoneIcon className="w-4 h-4 text-[#00FFFF]" /> +91 123 456 7890</li>
-          <li className="flex items-center gap-2"><MapPinIcon className="w-4 h-4 text-[#00FFFF]" /> VIT University Campus, Vellore, Tamil Nadu, India</li>
+          <li className="flex items-center gap-2">
+            <EnvelopeIcon className="w-4 h-4 text-[#00FFFF]" />
+            <span className="hover:text-[#00BFFF] hover:shadow-[0_0_10px_rgba(0,191,255,0.3)] transition-all cursor-pointer">
+              mdkaif196905@gmail.com
+            </span>
+          </li>
         </ul>
       </div>
     </div>

@@ -56,4 +56,3 @@ const PaperHeader: React.FC<PaperHeaderProps> = ({ paper }) => {
 };
 
 export default PaperHeader; 
-export default PaperHeader; 

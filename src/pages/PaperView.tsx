@@ -8,6 +8,7 @@ const typeLabels: Record<string, string> = {
   CAT2: 'CAT-2',
   FAT: 'FAT',
 };
+
 const typeColors: Record<string, string> = {
   CAT1: 'bg-[#008080] text-white',
   CAT2: 'bg-[#00BFFF] text-black',
@@ -18,21 +19,50 @@ const PaperView = () => {
   const { id } = useParams<{ id: string }>();
   const [paper, setPaper] = useState<Paper | null>(null);
   const [loading, setLoading] = useState(true);
+  const [iframeLoading, setIframeLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchDrivePapers().then((papers) => {
-      const found = papers.find((p) => p.id === id);
-      if (!found) {
-        navigate('/');
-      } else {
+    const loadPaper = async () => {
+      try {
+        // First try to get from sessionStorage
+        const cachedPaper = sessionStorage.getItem(`paper_${id}`);
+        if (cachedPaper) {
+          setPaper(JSON.parse(cachedPaper));
+          setLoading(false);
+          return;
+        }
+
+        // If not in cache, fetch all papers (this will be optimized in future with a single paper endpoint)
+        const papers = await fetchDrivePapers();
+        const found = papers.find((p) => p.id === id);
+        if (!found) {
+          navigate('/');
+          return;
+        }
+        
+        // Cache the paper for future use
+        sessionStorage.setItem(`paper_${id}`, JSON.stringify(found));
         setPaper(found);
+      } catch (error) {
+        console.error('Error loading paper:', error);
+        navigate('/');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
+
+    loadPaper();
   }, [id, navigate]);
 
-  if (loading) return <div className="text-center mt-10 text-lg text-gray-500">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black py-10 px-2 flex items-center justify-center">
+        <div className="text-[#00FFFF] text-lg">Loading paper details...</div>
+      </div>
+    );
+  }
+
   if (!paper) return null;
 
   const shareUrl = window.location.href;
@@ -83,13 +113,19 @@ const PaperView = () => {
             </div>
           </div>
           <div className="bg-gradient-to-br from-black to-[#008080]/20 rounded-xl shadow-inner p-2 md:p-4 border border-[#00FFFF]/30">
+            {iframeLoading && (
+              <div className="flex items-center justify-center h-[500px] bg-black/50">
+                <div className="text-[#00FFFF]">Loading preview...</div>
+              </div>
+            )}
             <iframe
               src={previewUrl}
               title="PDF Preview"
               width="100%"
               height="500px"
               allow="autoplay"
-              className="rounded-lg border border-[#00FFFF] shadow-md bg-white"
+              className={`rounded-lg border border-[#00FFFF] shadow-md bg-white transition-opacity duration-300 ${iframeLoading ? 'opacity-0' : 'opacity-100'}`}
+              onLoad={() => setIframeLoading(false)}
             />
           </div>
         </div>

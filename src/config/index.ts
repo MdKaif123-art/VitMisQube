@@ -1,7 +1,7 @@
 // Base URLs for different environments
 const BACKEND_URLS = {
   development: 'http://localhost:5000',
-  production: 'https://qp-sphere-backend.onrender.com'  // Replace with your actual Render backend URL
+  production: 'https://vitmisqube.onrender.com'  // Updated to match your deployed backend URL
 };
 
 // Check if we're running in development or production

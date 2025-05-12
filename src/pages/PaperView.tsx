@@ -22,6 +22,11 @@ const PaperView = () => {
   const [iframeLoading, setIframeLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Add effect to scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     const loadPaper = async () => {
       try {

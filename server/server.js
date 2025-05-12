@@ -74,6 +74,11 @@ const upload = multer({
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  onProgress: (progressEvent) => {
+    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+    // You can emit this progress to the client if needed
+    console.log(`Upload Progress: ${percentCompleted}%`);
   }
 });
 

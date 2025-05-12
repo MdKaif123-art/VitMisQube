@@ -1,77 +1,66 @@
-# QP-Sphere
+# VitMisQube - Question Paper Repository
 
-QP-Sphere is a modern web application for accessing and managing question papers. It provides an intuitive interface to browse, search, and view question papers based on course codes, exam types, and semesters.
+VitMisQube is a comprehensive platform for sharing and accessing academic question papers. It provides a user-friendly interface for students to upload, search, and download past exam papers.
 
 ## Features
 
-- Browse question papers by course code and name
-- Filter by exam type (CAT-1, CAT-2, FAT)
-- Search functionality
-- Responsive design
-- Google Drive integration for paper storage
+- **Paper Upload**: Easy-to-use interface for uploading question papers
+- **Search Functionality**: Search papers by course code or name
+- **File Management**: Secure storage and retrieval of papers
+- **Contact Support**: Built-in contact form for user support
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
 
 ## Tech Stack
 
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- React Router DOM
-- Headless UI
-- Hero Icons
+- Frontend: React.js with TypeScript
+- Backend: Node.js with Express
+- Styling: Tailwind CSS
+- File Storage: Local storage with Google Drive integration
+- Email Service: Nodemailer with Gmail
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 16.x or later
+- Node.js (v14 or higher)
 - npm or yarn
+- Git
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/qp-sphere.git
-cd qp-sphere
-```
+   ```bash
+   git clone [your-repo-url]
+   cd vitmisqube
+   ```
 
 2. Install dependencies:
-```bash
-npm install
-# or
-yarn install
-```
+   ```bash
+   # Install frontend dependencies
+   npm install
 
-3. Create a `.env` file in the root directory and add your Google Drive API credentials:
-```env
-VITE_GOOGLE_API_KEY=your_api_key
-VITE_FOLDER_ID=your_folder_id
-```
+   # Install backend dependencies
+   cd server
+   npm install
+   ```
 
-4. Start the development server:
-```bash
-npm run dev
-# or
-yarn dev
-```
+3. Create a `.env` file in the server directory:
+   ```
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASS=your-app-specific-password
+   PORT=5000
+   ```
 
-5. Build for production:
-```bash
-npm run build
-# or
-yarn build
-```
+4. Start the development servers:
+   ```bash
+   # Start backend server
+   cd server
+   npm start
 
-## File Naming Convention
-
-Question paper files should follow this format:
-```
-COURSECODE_COURSENAME_TYPE_SEMESTER_SlotXXX.pdf
-```
-Example:
-```
-ICSE102L_Structured and Object Oriented Programming_CAT1_Winter Semester_SlotD2.pdf
-```
+   # In a new terminal, start frontend
+   cd ..
+   npm start
+   ```
 
 ## Contributing
 
@@ -83,4 +72,10 @@ ICSE102L_Structured and Object Oriented Programming_CAT1_Winter Semester_SlotD2.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+Mohammed Kaif K - mdkaif196905@gmail.com
+
+Project Link: [https://github.com/yourusername/vitmisqube](https://github.com/yourusername/vitmisqube) 

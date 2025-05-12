@@ -43,23 +43,48 @@ const Upload = () => {
       const formData = new FormData();
       formData.append('file', files[0]);
 
-      const response = await fetch(UPLOAD_ENDPOINT, {
-        method: 'POST',
-        body: formData
+      // Use XMLHttpRequest to track upload progress
+      const xhr = new XMLHttpRequest();
+      
+      // Create a promise to handle the upload
+      const uploadPromise = new Promise<{ success: boolean; message?: string }>((resolve, reject) => {
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded * 100) / event.total);
+            setUploadProgress(progress);
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              resolve(response as { success: boolean; message?: string });
+            } catch (err) {
+              resolve({ success: true, message: 'File uploaded successfully!' });
+            }
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error occurred while uploading'));
+        });
+
+        xhr.addEventListener('abort', () => {
+          reject(new Error('Upload aborted'));
+        });
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (err) {
-        if (response.ok) {
-          data = { success: true, message: 'File uploaded successfully!' };
-        } else {
-          throw err;
-        }
-      }
+      // Open and send the request
+      xhr.open('POST', UPLOAD_ENDPOINT);
+      xhr.send(formData);
 
-      if (response.ok || data.success) {
+      // Wait for the upload to complete
+      const data = await uploadPromise;
+
+      if (data.success) {
         setUploadProgress(100);
         setStatus({ 
           type: 'success', 

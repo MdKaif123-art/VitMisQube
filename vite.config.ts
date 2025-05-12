@@ -19,10 +19,16 @@ export default defineConfig({
         },
       },
     },
+    assetsDir: 'assets',
+    manifest: true,
+    modulePreload: {
+      polyfill: true
+    }
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  }
+  },
+  base: './'
 }) 

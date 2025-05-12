@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { EnvelopeIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { API_URL } from '../config/index';
 
+const UPLOAD_ENDPOINT = `${API_URL}/api/upload`;
+
 const faqs = [
   {
     q: 'How do I search for papers?',
@@ -33,6 +35,9 @@ const Contact = () => {
   });
   const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -108,6 +113,95 @@ const Contact = () => {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setUploadProgress(0);
+      // Clear any previous upload errors
+      if (errors.file) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.file;
+          return newErrors;
+        });
+      }
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedFile) {
+      setErrors(prev => ({ ...prev, file: 'Please select a file to upload' }));
+      return;
+    }
+
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      // Use XMLHttpRequest to track upload progress
+      const xhr = new XMLHttpRequest();
+      
+      // Create a promise to handle the upload
+      const uploadPromise = new Promise<{ success: boolean; message?: string }>((resolve, reject) => {
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded * 100) / event.total);
+            setUploadProgress(progress);
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              resolve(response as { success: boolean; message?: string });
+            } catch (err) {
+              resolve({ success: true, message: 'File uploaded successfully!' });
+            }
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error occurred while uploading'));
+        });
+
+        xhr.addEventListener('abort', () => {
+          reject(new Error('Upload aborted'));
+        });
+      });
+
+      // Open and send the request
+      xhr.open('POST', UPLOAD_ENDPOINT);
+      xhr.send(formData);
+
+      // Wait for the upload to complete
+      const data = await uploadPromise;
+
+      if (data.success) {
+        setUploadProgress(100);
+        setSelectedFile(null);
+        // Clear file input
+        const fileInput = document.getElementById('file') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+      } else {
+        throw new Error(data.message || 'Failed to upload file');
+      }
+    } catch (err) {
+      setErrors(prev => ({ 
+        ...prev, 
+        file: err instanceof Error ? err.message : 'Error uploading file' 
+      }));
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -127,22 +221,31 @@ const Contact = () => {
         body: JSON.stringify(form)
       });
 
+      // First check if the response is ok
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      // Try to parse as JSON
       let data;
-      try {
-        data = await res.json();
-      } catch (err) {
-        // If response is not JSON, check if it was successful anyway
-        if (res.ok) {
-          data = { success: true, message: 'Message sent successfully!' };
-        } else {
-          throw err;
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        try {
+          data = await res.json();
+        } catch (err) {
+          console.error('Failed to parse JSON response:', err);
+          throw new Error('Invalid response format from server');
         }
+      } else {
+        // Handle non-JSON response
+        const text = await res.text();
+        console.log('Non-JSON response:', text);
+        data = { success: true, message: 'Message sent successfully!' };
       }
 
       console.log('Server response:', { status: res.status, data });
       
-      // Consider the request successful if either the response is OK or data indicates success
-      if (res.ok || data.success) {
+      if (data.success) {
         console.log('Form submitted successfully');
         setStatus('success');
         setForm({
@@ -181,7 +284,9 @@ const Contact = () => {
     } catch (err) {
       console.error('Form submission error:', err);
       setStatus('error');
-      setErrors({ general: 'Failed to send message. Please check your connection and try again.' });
+      setErrors({ 
+        general: 'Failed to send message. Please check your connection and try again.' 
+      });
     }
   };
 
@@ -303,7 +408,7 @@ const Contact = () => {
                 value={form.mobileNumber}
                 onChange={handleChange}
                 className={`bg-black border ${errors.mobileNumber ? 'border-red-500' : 'border-[#008080]'} text-white rounded-lg p-2 w-full focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF] transition-all`}
-                placeholder="+91 1234567890"
+                placeholder="1234567890"
               />
               {errors.mobileNumber && (
                 <p className="text-red-400 text-sm mt-1">{errors.mobileNumber}</p>
@@ -347,6 +452,51 @@ const Contact = () => {
               />
               {errors.message && (
                 <p className="text-red-400 text-sm mt-1">{errors.message}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="file" className="block text-sm font-semibold mb-1 text-[#00FFFF]">
+                Attach File (Optional)
+                {errors.file && <span className="text-red-400 ml-1">*</span>}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  id="file"
+                  name="file"
+                  onChange={handleFileChange}
+                  accept=".pdf,.doc,.docx"
+                  className={`bg-black border ${errors.file ? 'border-red-500' : 'border-[#008080]'} text-white rounded-lg p-2 flex-1 focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF] transition-all`}
+                />
+                {selectedFile && (
+                  <button
+                    type="button"
+                    onClick={handleFileUpload}
+                    disabled={uploading}
+                    className={`px-4 py-2 rounded-lg text-white transition-all ${
+                      uploading
+                        ? 'bg-[#008080]/50 cursor-not-allowed'
+                        : 'bg-[#00FFFF] hover:bg-[#00BFFF]'
+                    }`}
+                  >
+                    {uploading
+                      ? uploadProgress < 100
+                        ? `${uploadProgress}%`
+                        : 'Processing...'
+                      : 'Upload'}
+                  </button>
+                )}
+              </div>
+              {uploading && (
+                <div className="mt-2 w-full bg-[#008080]/30 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="h-full bg-[#00FFFF] transition-all duration-300" 
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              )}
+              {errors.file && (
+                <p className="text-red-400 text-sm mt-1">{errors.file}</p>
               )}
             </div>
             <button

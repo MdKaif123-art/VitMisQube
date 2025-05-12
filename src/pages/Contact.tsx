@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { EnvelopeIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { API_URL } from '../config/index';
 
-const UPLOAD_ENDPOINT = `${API_URL}/api/upload`;
+const CONTACT_ENDPOINT = `${API_URL}/send`;  // Use API_URL from config
 
 const faqs = [
   {
@@ -23,8 +23,6 @@ const faqs = [
   },
 ];
 
-const CONTACT_ENDPOINT = `${API_URL}/send`;  // Use API_URL from config
-
 const Contact = () => {
   const [form, setForm] = useState({
     fullName: '',
@@ -35,9 +33,6 @@ const Contact = () => {
   });
   const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errors, setErrors] = useState<{[key: string]: string}>({});
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploading, setUploading] = useState(false);
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -110,95 +105,6 @@ const Contact = () => {
     
     if (status === 'success' || status === 'error') {
       setStatus('idle');
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setUploadProgress(0);
-      // Clear any previous upload errors
-      if (errors.file) {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.file;
-          return newErrors;
-        });
-      }
-    }
-  };
-
-  const handleFileUpload = async () => {
-    if (!selectedFile) {
-      setErrors(prev => ({ ...prev, file: 'Please select a file to upload' }));
-      return;
-    }
-
-    setUploading(true);
-    setUploadProgress(0);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
-      // Use XMLHttpRequest to track upload progress
-      const xhr = new XMLHttpRequest();
-      
-      // Create a promise to handle the upload
-      const uploadPromise = new Promise<{ success: boolean; message?: string }>((resolve, reject) => {
-        xhr.upload.addEventListener('progress', (event) => {
-          if (event.lengthComputable) {
-            const progress = Math.round((event.loaded * 100) / event.total);
-            setUploadProgress(progress);
-          }
-        });
-
-        xhr.addEventListener('load', () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const response = JSON.parse(xhr.responseText);
-              resolve(response as { success: boolean; message?: string });
-            } catch (err) {
-              resolve({ success: true, message: 'File uploaded successfully!' });
-            }
-          } else {
-            reject(new Error('Upload failed'));
-          }
-        });
-
-        xhr.addEventListener('error', () => {
-          reject(new Error('Network error occurred while uploading'));
-        });
-
-        xhr.addEventListener('abort', () => {
-          reject(new Error('Upload aborted'));
-        });
-      });
-
-      // Open and send the request
-      xhr.open('POST', UPLOAD_ENDPOINT);
-      xhr.send(formData);
-
-      // Wait for the upload to complete
-      const data = await uploadPromise;
-
-      if (data.success) {
-        setUploadProgress(100);
-        setSelectedFile(null);
-        // Clear file input
-        const fileInput = document.getElementById('file') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
-      } else {
-        throw new Error(data.message || 'Failed to upload file');
-      }
-    } catch (err) {
-      setErrors(prev => ({ 
-        ...prev, 
-        file: err instanceof Error ? err.message : 'Error uploading file' 
-      }));
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -452,51 +358,6 @@ const Contact = () => {
               />
               {errors.message && (
                 <p className="text-red-400 text-sm mt-1">{errors.message}</p>
-              )}
-            </div>
-            <div>
-              <label htmlFor="file" className="block text-sm font-semibold mb-1 text-[#00FFFF]">
-                Attach File (Optional)
-                {errors.file && <span className="text-red-400 ml-1">*</span>}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="file"
-                  id="file"
-                  name="file"
-                  onChange={handleFileChange}
-                  accept=".pdf,.doc,.docx"
-                  className={`bg-black border ${errors.file ? 'border-red-500' : 'border-[#008080]'} text-white rounded-lg p-2 flex-1 focus:border-[#00FFFF] focus:ring-1 focus:ring-[#00FFFF] transition-all`}
-                />
-                {selectedFile && (
-                  <button
-                    type="button"
-                    onClick={handleFileUpload}
-                    disabled={uploading}
-                    className={`px-4 py-2 rounded-lg text-white transition-all ${
-                      uploading
-                        ? 'bg-[#008080]/50 cursor-not-allowed'
-                        : 'bg-[#00FFFF] hover:bg-[#00BFFF]'
-                    }`}
-                  >
-                    {uploading
-                      ? uploadProgress < 100
-                        ? `${uploadProgress}%`
-                        : 'Processing...'
-                      : 'Upload'}
-                  </button>
-                )}
-              </div>
-              {uploading && (
-                <div className="mt-2 w-full bg-[#008080]/30 rounded-full h-2 overflow-hidden">
-                  <div 
-                    className="h-full bg-[#00FFFF] transition-all duration-300" 
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              )}
-              {errors.file && (
-                <p className="text-red-400 text-sm mt-1">{errors.file}</p>
               )}
             </div>
             <button

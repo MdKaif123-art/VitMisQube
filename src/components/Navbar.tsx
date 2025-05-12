@@ -8,10 +8,7 @@ const Navbar = () => {
   return (
     <div className="relative z-50">
       <nav
-        className="bg-black px-4 md:px-6 py-2 md:py-4 flex items-center justify-between rounded-b-2xl"
-        style={{
-          boxShadow: '0 8px 32px 0 #00FFFF'
-        }}
+        className="bg-black px-4 md:px-6 py-2 md:py-4 flex items-center justify-between"
       >
         <Link to="/" className="flex items-center gap-3 group">
           <img 
@@ -63,36 +60,39 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       <div
-        className={`fixed md:hidden inset-0 bg-black/95 backdrop-blur-sm transition-all duration-300 ${
+        className={`fixed md:hidden inset-0 bg-black transition-all duration-300 ${
           isMenuOpen ? 'opacity-100 visible translate-x-0' : 'opacity-0 invisible translate-x-full'
         }`}
-        style={{ top: '64px' }}
+        style={{ 
+          top: '64px',
+          background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.98), rgba(0, 0, 0, 1))'
+        }}
       >
-        <div className="flex flex-col space-y-6 p-6 border-t border-[#00FFFF]/20">
+        <div className="flex flex-col space-y-6 p-6 border-t border-[#00FFFF]/20 bg-black">
           <Link 
             to="/" 
-            className="text-[#00FFFF] hover:text-white transition-colors text-xl font-semibold"
+            className="text-[#00FFFF] hover:text-white transition-colors text-xl font-semibold relative z-10"
             onClick={() => setIsMenuOpen(false)}
           >
             Home
           </Link>
           <Link 
             to="/about" 
-            className="text-[#00FFFF] hover:text-white transition-colors text-xl font-semibold"
+            className="text-[#00FFFF] hover:text-white transition-colors text-xl font-semibold relative z-10"
             onClick={() => setIsMenuOpen(false)}
           >
             About
           </Link>
           <Link 
             to="/contact" 
-            className="text-[#00FFFF] hover:text-white transition-colors text-xl font-semibold"
+            className="text-[#00FFFF] hover:text-white transition-colors text-xl font-semibold relative z-10"
             onClick={() => setIsMenuOpen(false)}
           >
             Contact
           </Link>
           <Link 
             to="/upload" 
-            className="text-[#00FFFF] hover:text-white transition-colors text-xl font-semibold"
+            className="text-[#00FFFF] hover:text-white transition-colors text-xl font-semibold relative z-10"
             onClick={() => setIsMenuOpen(false)}
           >
             Upload Papers
@@ -100,17 +100,11 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Glow bar */}
+      {/* Bottom glow effect */}
       <div
-        className="absolute left-0 right-0 mx-auto"
+        className="absolute left-0 right-0 bottom-0 h-[1px] bg-[#00FFFF]/80"
         style={{
-          height: '18px',
-          top: '100%',
-          borderRadius: '0 0 24px 24px',
-          background: 'radial-gradient(ellipse at center, #00FFFF 0%, transparent 80%)',
-          filter: 'blur(6px)',
-          opacity: 0.7,
-          zIndex: 1
+          boxShadow: '0 0 8px 0.5px rgba(0, 255, 255, 0.8)'
         }}
       />
     </div>

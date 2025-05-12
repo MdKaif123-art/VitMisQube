@@ -31,7 +31,6 @@ const Upload = () => {
 
   const handleUpload = async () => {
     if (files.length === 0) {
-      setStatus({ type: 'error', message: 'Please select a file to upload' });
       return;
     }
 
@@ -43,16 +42,19 @@ const Upload = () => {
       const formData = new FormData();
       formData.append('file', files[0]);
 
-      // Use XMLHttpRequest to track upload progress
       const xhr = new XMLHttpRequest();
       
-      // Create a promise to handle the upload
       const uploadPromise = new Promise<{ success: boolean; message?: string }>((resolve, reject) => {
         xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable) {
             const progress = Math.round((event.loaded * 100) / event.total);
             setUploadProgress(progress);
+            console.log('Upload progress:', progress);
           }
+        });
+
+        xhr.addEventListener('loadstart', () => {
+          console.log('Upload started');
         });
 
         xhr.addEventListener('load', () => {
@@ -77,11 +79,9 @@ const Upload = () => {
         });
       });
 
-      // Open and send the request
       xhr.open('POST', UPLOAD_ENDPOINT);
       xhr.send(formData);
 
-      // Wait for the upload to complete
       const data = await uploadPromise;
 
       if (data.success) {
@@ -92,18 +92,17 @@ const Upload = () => {
         });
         setFiles([]);
         
-        // Clear success message after 5 seconds
         setTimeout(() => {
           setStatus({ type: null, message: null });
+          setUploadProgress(0);
         }, 5000);
-      } else {
-        throw new Error(data.message || 'Failed to upload file');
       }
     } catch (err) {
       setStatus({ 
         type: 'error', 
-        message: err instanceof Error ? err.message : 'Network error occurred while uploading' 
+        message: err instanceof Error ? err.message : 'Error uploading file' 
       });
+      setUploadProgress(0);
     } finally {
       setUploading(false);
     }
@@ -177,11 +176,13 @@ const Upload = () => {
                     : 'bg-[#00FFFF] hover:bg-[#00BFFF]'
                 }`}
               >
-                {uploading
-                  ? uploadProgress < 100
-                    ? `Uploading... ${uploadProgress}%`
-                    : 'Processing...'
-                  : 'Upload File'}
+                {uploading ? (
+                  <span className="flex items-center justify-center">
+                    <span>Uploading... {uploadProgress}%</span>
+                  </span>
+                ) : (
+                  'Upload File'
+                )}
               </button>
               {uploading && (
                 <div className="mt-3 w-full bg-[#008080]/30 rounded-full h-2 overflow-hidden">

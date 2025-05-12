@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Circle } from "lucide-react";
 import { twMerge } from 'tailwind-merge';
 import { clsx } from 'clsx';
+import AnimatedTitle from './AnimatedTitle';
 
 const cn = (...inputs: any) => {
   return twMerge(clsx(inputs));
@@ -168,19 +169,35 @@ function HeroGeometric({
                         variants={fadeUpVariants}
                         initial="hidden"
                         animate="visible"
+                        className="flex flex-col items-center"
                     >
                         <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-6 md:mb-8 tracking-tight">
-                            <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80">
-                                {title1}
-                            </span>
-                            <br />
-                            <span
-                                className={cn(
-                                    "bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-white/90 to-rose-300 "
-                                )}
+                            <motion.span
+                                initial={{ opacity: 0, scale: 0.5 }}
+                                animate={{ 
+                                    opacity: 1, 
+                                    scale: 1,
+                                    textShadow: [
+                                        "0 0 20px rgba(0, 255, 255, 0)",
+                                        "0 0 20px rgba(0, 255, 255, 0.5)",
+                                        "0 0 20px rgba(0, 255, 255, 0.2)",
+                                        "0 0 20px rgba(0, 255, 255, 0.4)"
+                                    ]
+                                }}
+                                transition={{ 
+                                    duration: 1,
+                                    times: [0, 0.4, 0.7, 1],
+                                    ease: "easeOut"
+                                }}
+                                className="bg-clip-text text-transparent bg-gradient-to-r from-[#00FFFF] via-[#00BFFF] to-[#008080] block mb-2"
                             >
-                                {title2}
-                            </span>
+                                {title1}
+                            </motion.span>
+                            <AnimatedTitle 
+                                text={title2} 
+                                delay={1500}
+                                className="text-4xl sm:text-6xl md:text-8xl font-bold tracking-tight inline-block"
+                            />
                         </h1>
                     </motion.div>
 
@@ -191,8 +208,7 @@ function HeroGeometric({
                         animate="visible"
                     >
                         <p className="text-base sm:text-lg md:text-xl text-white/40 mb-8 leading-relaxed font-light tracking-wide max-w-xl mx-auto px-4">
-                            Crafting exceptional digital experiences through
-                            innovative design and cutting-edge technology.
+                            Your comprehensive resource for VIT question papers
                         </p>
                     </motion.div>
                 </div>

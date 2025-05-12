@@ -13,4 +13,4 @@ export const API_URL = isDevelopment ? BACKEND_URLS.development : BACKEND_URLS.p
 
 // Export other configuration values
 export const APP_VERSION = '1.0.0';
-export const APP_NAME = 'QP-Sphere'; 
+export const APP_NAME = 'VITMISQUBE'; 

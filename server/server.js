@@ -70,17 +70,13 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + '-' + file.originalname);
   }
 });
+
 const upload = multer({ 
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
-  onProgress: (progressEvent) => {
-    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-    // You can emit this progress to the client if needed
-    console.log(`Upload Progress: ${percentCompleted}%`);
   }
-});
+}).single('file');
 
 // Email configuration
 const EMAIL_USER = process.env.EMAIL_USER || 'quizingsphere@gmail.com';
@@ -104,10 +100,16 @@ transporter.verify()
   .catch(err => console.error('Email service verification failed:', err));
 
 // File upload endpoint
-app.post('/api/upload', upload.single('file'), async (req, res) => {
-  try {
-    console.log('Received file upload request');
-    
+app.post('/api/upload', (req, res) => {
+  upload(req, res, async function(err) {
+    if (err) {
+      console.error('Upload error:', err);
+      return res.status(500).json({
+        success: false,
+        message: err.message || 'Error uploading file'
+      });
+    }
+
     if (!req.file) {
       return res.status(400).json({ 
         success: false,
@@ -115,38 +117,40 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
       });
     }
 
-    const mailOptions = {
-      from: EMAIL_USER,
-      to: EMAIL_USER,
-      subject: 'New File Upload Notification',
-      text: `A new file has been uploaded:
+    try {
+      const mailOptions = {
+        from: EMAIL_USER,
+        to: EMAIL_USER,
+        subject: 'New File Upload Notification',
+        text: `A new file has been uploaded:
 Filename: ${req.file.originalname}
 Stored as: ${req.file.filename}
 Size: ${req.file.size} bytes
 Uploaded at: ${new Date().toLocaleString()}`,
-      attachments: [
-        {
-          filename: req.file.originalname,
-          path: req.file.path
-        }
-      ]
-    };
+        attachments: [
+          {
+            filename: req.file.originalname,
+            path: req.file.path
+          }
+        ]
+      };
 
-    await transporter.sendMail(mailOptions);
-    console.log('Upload notification email sent successfully');
+      await transporter.sendMail(mailOptions);
+      console.log('Upload notification email sent successfully');
 
-    res.status(200).json({
-      success: true,
-      message: 'File uploaded successfully and email notification sent',
-      filename: req.file.filename
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Error uploading file or sending notification'
-    });
-  }
+      res.status(200).json({
+        success: true,
+        message: 'File uploaded successfully and email notification sent',
+        filename: req.file.filename
+      });
+    } catch (error) {
+      console.error('Error in upload process:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Error uploading file or sending notification'
+      });
+    }
+  });
 });
 
 // Contact form endpoint

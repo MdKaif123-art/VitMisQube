@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { EnvelopeIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
-import { API_URL } from '../config';
+import { API_URL } from '../config/index';
 
 const faqs = [
   {

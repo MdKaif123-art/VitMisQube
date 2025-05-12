@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Link } from 'react-router-dom';
-import { API_URL } from '../config';
+import { API_URL } from '../config/index';
 
 const UPLOAD_ENDPOINT = `${API_URL}/api/upload`;
 

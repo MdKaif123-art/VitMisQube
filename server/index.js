@@ -81,7 +81,7 @@ app.post('/send', async (req, res) => {
     if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) errors.push('Invalid email address');
     if (!mobileNumber || mobileNumber.length < 10) errors.push('Invalid mobile number');
     if (!subject) errors.push('Subject is required');
-    if (!message || message.length < 10) errors.push('Message must be at least 10 characters long');
+    if (!message || message.length < 2) errors.push('Message must be at least 2 characters long');
 
     if (errors.length > 0) {
       console.log('Validation errors:', errors);

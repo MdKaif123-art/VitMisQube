@@ -2,6 +2,15 @@
 
 VitMisQube is a comprehensive platform for sharing and accessing academic question papers. It provides a user-friendly interface for students to upload, search, and download past exam papers.
 
+## About the Name
+
+**VITMISQUBE** represents:
+- **VIT**: Vellore Institute of Technology, one of India's leading technical universities
+- **MIS**: M.Tech Integrated Software Engineering, a specialized program offering integrated masters in software engineering
+- **QUBE**: Question Bank Universe, representing our comprehensive collection of previous year papers and academic resources
+
+The platform serves as a centralized hub for VIT students, particularly those in the M.Tech Integrated Software Engineering program, to access and share previous year question papers, helping them better prepare for their examinations.
+
 ## Features
 
 - **Paper Upload**: Easy-to-use interface for uploading question papers

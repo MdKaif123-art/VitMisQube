@@ -207,9 +207,34 @@ function HeroGeometric({
                         initial="hidden"
                         animate="visible"
                     >
-                        <p className="text-base sm:text-lg md:text-xl text-white/40 mb-8 leading-relaxed font-light tracking-wide max-w-xl mx-auto px-4">
-                            Your comprehensive resource for VIT question papers
-                        </p>
+                        <div className="space-y-4">
+                            <p className="text-base sm:text-lg md:text-xl text-white/40 mb-4 leading-relaxed font-light tracking-wide max-w-xl mx-auto px-4">
+                                Your comprehensive resource for VIT question papers
+                            </p>
+                            
+                            <div className="text-sm md:text-base text-white/30 max-w-2xl mx-auto px-4">
+                                <div className="flex flex-col items-center gap-y-2">
+                                    <div className="flex items-center justify-center gap-x-2">
+                                        <div className="flex items-center gap-x-2">
+                                            <span className="text-[#00FFFF]/60 text-xs">•</span>
+                                            <span className="text-[#00FFFF]/80 font-medium">VIT</span>
+                                            <span className="text-white/40">Vellore Institute of Technology</span>
+                                        </div>
+                                        <span className="text-[#00FFFF]/60 mx-2">•</span>
+                                        <div className="flex items-center gap-x-2">
+                                            <span className="text-[#00FFFF]/80 font-medium">MIS</span>
+                                            <span className="text-white/40">M.Tech Integrated Software</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-center gap-x-2">
+                                        <span className="text-[#00FFFF]/60 text-xs">•</span>
+                                        <span className="text-[#00FFFF]/80 font-medium">QUBE</span>
+                                        <span className="text-white/40">Question Bank</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </motion.div>
                 </div>
             </div>

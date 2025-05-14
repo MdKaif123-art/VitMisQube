@@ -29,7 +29,7 @@ class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Error caught by boundary:', error, errorInfo);
-    trackError('error_boundary', error.message, errorInfo.componentStack);
+    trackError('error_boundary', error.message || 'Unknown error', errorInfo.componentStack || 'Unknown location');
   }
 
   resetErrorBoundary = () => {

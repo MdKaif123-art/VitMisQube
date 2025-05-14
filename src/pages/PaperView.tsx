@@ -81,7 +81,6 @@ const PaperView = () => {
 
   if (!paper) return null;
 
-  const shareUrl = window.location.href;
   const downloadUrl = `https://drive.google.com/uc?export=download&id=${paper.id}`;
   const previewUrl = `https://drive.google.com/file/d/${paper.id}/preview`;
 

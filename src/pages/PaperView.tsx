@@ -59,8 +59,9 @@ const PaperView = () => {
         sessionStorage.setItem(`paper_${id}`, JSON.stringify(found));
         setPaper(found);
       } catch (error) {
-        console.error('Error loading paper:', error);
-        trackError('load_paper', error.message, 'PaperView.tsx');
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        console.error('Error loading paper:', errorMessage);
+        trackError('load_paper', errorMessage, 'PaperView.tsx');
         navigate('/');
       } finally {
         setLoading(false);
@@ -101,8 +102,9 @@ const PaperView = () => {
         alert('Link copied to clipboard!');
       }
     } catch (error) {
-      console.error('Error sharing:', error);
-      trackError('share_paper', error.message, 'PaperView.tsx');
+      const errorMessage = error instanceof Error ? error.message : 'Error sharing paper';
+      console.error('Error sharing:', errorMessage);
+      trackError('share_paper', errorMessage, 'PaperView.tsx');
     }
   };
 

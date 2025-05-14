@@ -4,6 +4,7 @@ import { fetchDrivePapers, Paper } from '../utils/fetchDriveFiles';
 import { Link, useNavigate } from 'react-router-dom';
 import { Listbox, Transition } from '@headlessui/react';
 import { HeroGeometric } from '../components/ui/shape-landing-hero';
+import { trackSearch, trackFilter, trackInteraction, trackError } from '../utils/analytics';
 
 const typeColors: Record<string, string> = {
   'CAT1': 'bg-[#008080] text-white',
@@ -57,6 +58,7 @@ const Home = () => {
       })
       .catch((error) => {
         console.error('Error fetching papers:', error);
+        trackError('fetch_papers', error.message, 'Home.tsx');
       })
       .finally(() => {
         if (mounted) {
@@ -121,18 +123,37 @@ const Home = () => {
     return 'Displaying latest papers';
   };
 
-  // Handle suggestion click
+  // Track search after debounce
+  useEffect(() => {
+    if (searchQuery.length > 0) {
+      const timeoutId = setTimeout(() => {
+        trackSearch(searchQuery, filteredPapers.length);
+      }, 1000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchQuery, filteredPapers.length]);
+
+  // Track filter changes
+  useEffect(() => {
+    if (selectedType !== 'all') {
+      trackFilter('exam_type', selectedType);
+    }
+  }, [selectedType]);
+
+  // Handle suggestion click with tracking
   const handleSuggestionClick = (course: string) => {
     setSelectedCourse(course);
     setSearchQuery(course);
     setSuggestions([]);
+    trackInteraction('suggestion_click', 'search_suggestions', course);
   };
 
-  // Clear selected course
+  // Clear selection with tracking
   const clearSelection = () => {
     setSelectedCourse(null);
     setSearchQuery('');
     inputRef.current?.focus();
+    trackInteraction('clear_selection', 'search_clear_button');
   };
 
   return (

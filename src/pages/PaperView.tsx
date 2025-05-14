@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchDrivePapers, Paper } from '../utils/fetchDriveFiles';
 import { ArrowDownTrayIcon, ShareIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { trackPaperView, trackPaperDownload, trackShare, trackError } from '../utils/analytics';
 
 const typeLabels: Record<string, string> = {
   CAT1: 'CAT-1',
@@ -22,6 +23,13 @@ const PaperView = () => {
   const [iframeLoading, setIframeLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Track paper view when component mounts
+  useEffect(() => {
+    if (paper) {
+      trackPaperView(paper.courseCode, paper.courseName, paper.type, paper.semester);
+    }
+  }, [paper]);
+
   // Add effect to scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -38,10 +46,11 @@ const PaperView = () => {
           return;
         }
 
-        // If not in cache, fetch all papers (this will be optimized in future with a single paper endpoint)
+        // If not in cache, fetch all papers
         const papers = await fetchDrivePapers();
         const found = papers.find((p) => p.id === id);
         if (!found) {
+          trackError('paper_not_found', `Paper ID ${id} not found`, 'PaperView.tsx');
           navigate('/');
           return;
         }
@@ -51,6 +60,7 @@ const PaperView = () => {
         setPaper(found);
       } catch (error) {
         console.error('Error loading paper:', error);
+        trackError('load_paper', error.message, 'PaperView.tsx');
         navigate('/');
       } finally {
         setLoading(false);
@@ -75,15 +85,31 @@ const PaperView = () => {
   const previewUrl = `https://drive.google.com/file/d/${paper.id}/preview`;
 
   const handleShare = async () => {
-    if (navigator.share) {
-      await navigator.share({
-        title: `${paper.courseCode} ${typeLabels[paper.type]}`,
-        text: `${paper.courseName} (${typeLabels[paper.type]})`,
-        url: shareUrl,
-      });
-    } else {
-      await navigator.clipboard.writeText(shareUrl);
-      alert('Link copied to clipboard!');
+    if (!paper) return;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${paper.courseCode} ${typeLabels[paper.type]}`,
+          text: `${paper.courseName} (${typeLabels[paper.type]})`,
+          url: window.location.href,
+        });
+        trackShare('paper', paper.id, 'native_share');
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        trackShare('paper', paper.id, 'copy_link');
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      trackError('share_paper', error.message, 'PaperView.tsx');
+    }
+  };
+
+  const handleDownload = () => {
+    if (paper) {
+      trackPaperDownload(paper.courseCode, paper.courseName, paper.type);
+      window.open(downloadUrl, '_blank');
     }
   };
 
@@ -107,10 +133,10 @@ const PaperView = () => {
               <div className="text-[#008080] text-sm mb-1">Semester: <span className="font-medium text-[#00BFFF]">{paper.semester}</span> &nbsp; | &nbsp; Slot: <span className="font-medium text-[#00BFFF]">{paper.slot}</span></div>
             </div>
             <div className="flex gap-3">
-              <a href={downloadUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 border border-[#00FFFF] px-5 py-2 rounded-lg bg-black hover:bg-[#00FFFF]/10 text-[#00FFFF] font-semibold shadow-sm transition-all">
+              <button onClick={handleDownload} className="flex items-center gap-2 border border-[#00FFFF] px-5 py-2 rounded-lg bg-black hover:bg-[#00FFFF]/10 text-[#00FFFF] font-semibold shadow-sm transition-all">
                 <ArrowDownTrayIcon className="w-5 h-5" />
                 Download
-              </a>
+              </button>
               <button onClick={handleShare} className="flex items-center gap-2 border border-[#00FFFF] px-5 py-2 rounded-lg bg-black hover:bg-[#00FFFF]/10 text-[#00FFFF] font-semibold shadow-sm transition-all">
                 <ShareIcon className="w-5 h-5" />
                 Share

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../config/index';
+import { trackUpload, trackError } from '../utils/analytics';
 
 const UPLOAD_ENDPOINT = `${API_URL}/api/upload`;
 
@@ -88,7 +89,7 @@ const Upload = () => {
         setUploadProgress(100);
         setStatus({ 
           type: 'success', 
-          message: 'File uploaded successfully!'
+          message: 'File uploaded successfully! It will be reviewed and published soon.'
         });
         setFiles([]);
         
@@ -96,11 +97,18 @@ const Upload = () => {
           setStatus({ type: null, message: null });
           setUploadProgress(0);
         }, 5000);
+
+        // Track successful upload
+        trackUpload('success', files[0].type);
       }
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error uploading file';
+      trackUpload('failure', files[0].type, errorMessage);
+      trackError('upload_file', errorMessage, 'Upload.tsx');
+      
       setStatus({ 
         type: 'error', 
-        message: err instanceof Error ? err.message : 'Error uploading file' 
+        message: errorMessage
       });
       setUploadProgress(0);
     } finally {

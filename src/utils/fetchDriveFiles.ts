@@ -25,24 +25,33 @@ function parseFileName(name: string): Omit<Paper, 'id' | 'driveLink' | 'uploadDa
 
 export async function fetchDrivePapers(): Promise<Paper[]> {
   try {
-    const response = await fetch(
-      `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType='application/pdf'&key=${API_KEY}&fields=files(id,name,webViewLink,modifiedTime)`,
-      {
-        method: 'GET',
-        credentials: 'omit',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+    let allFiles: any[] = [];
+    let nextPageToken: string | null = null;
+
+    do {
+      const pageQuery: string = nextPageToken ? `&pageToken=${nextPageToken}` : '';
+      const response: Response = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType='application/pdf'&key=${API_KEY}&fields=files(id,name,webViewLink,modifiedTime),nextPageToken${pageQuery}`,
+        {
+          method: 'GET',
+          credentials: 'omit',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
         }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch files from Drive');
       }
-    );
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch files from Drive');
-    }
+      const data: { files?: any[], nextPageToken?: string } = await response.json();
+      allFiles = allFiles.concat(data.files || []);
+      nextPageToken = data.nextPageToken || null;
+    } while (nextPageToken);
 
-    const data = await response.json();
-    return data.files.map((file: any) => {
+    return allFiles.map((file: any) => {
       const parsed = parseFileName(file.name);
       return {
         id: file.id,
